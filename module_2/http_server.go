@@ -62,7 +62,7 @@ func panicHandler(w http.ResponseWriter, request *http.Request) {
 func main() {
 	http.HandleFunc("/healthz", unifyHandler(healthzHandler))
 	http.HandleFunc("/panic", unifyHandler(panicHandler))
-	if err := http.ListenAndServe("127.0.0.1:8080", nil); err != nil {
-		fmt.Println("server error")
+	if err := http.ListenAndServe("0.0.0.0:8080", nil); err != nil {
+		fmt.Println("server start fail")
 	}
 }
