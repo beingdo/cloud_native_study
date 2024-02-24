@@ -34,14 +34,15 @@ spec:
         limits:
           memory: "64Mi"
           cpu: "500m"
+      volumeMounts:
+        - name: config-volume
+          mountPath: /etc/config
+          readOnly: true
     volumes:
         - name: config-volume
           configMap:
             name: example-configmap
-    volumeMounts:
-        - name: config-volume
-          mountPath: /etc/config
-          readOnly: true
+
 
 ---
 apiVersion: v1
