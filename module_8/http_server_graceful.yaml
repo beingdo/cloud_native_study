@@ -5,7 +5,8 @@ metadata:
 spec:
     containers:
     - name: http-server-graceful
-      image: http-server-graceful
+      image: bingdongxiaozi/cloud_native_study:v1
+      imagePullPolicy: IfNotPresent
       ports:
         - containerPort: 8080
       livenessProbe:
