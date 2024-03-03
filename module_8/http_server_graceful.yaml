@@ -1,48 +1,49 @@
-apiVersion: v1
-kind: Pod
-metadata:
-  name: http-server-graceful
-spec:
-    containers:
-    - name: http-server-graceful
-      image: bingdongxiaozi/cloud_native_study:v1
-      imagePullPolicy: IfNotPresent
-      ports:
-        - containerPort: 8080
-      livenessProbe:
-        httpGet:
-          path: /healthz
-          port: 8080
-        initialDelaySeconds: 5
-        periodSeconds: 2
-      readinessProbe:
-        httpGet:
-          path: /readiness
-          port: 8080
-        initialDelaySeconds: 2
-        periodSeconds: 1
-      lifecycle:
-        postStart:
-          exec:
-            command: ["/bin/sh", "-c", "echo 'The http server is running!'"]
-        preStop:
-          exec:
-            command: ["/bin/sh", "-c", "pkill -f http-server-graceful"]
-      resources:
-        requests:
-          memory: "32Mi"
-          cpu: "250m"
-        limits:
-          memory: "64Mi"
-          cpu: "500m"
-      volumeMounts:
-        - name: config-volume
-          mountPath: /etc/config
-          readOnly: true
-    volumes:
-        - name: config-volume
-          configMap:
-            name: example-configmap
+#
+#apiVersion: v1
+#kind: Pod
+#metadata:
+#  name: http-server-graceful
+#spec:
+#    containers:
+#    - name: http-server-graceful
+#      image: bingdongxiaozi/cloud_native_study:v1
+#      imagePullPolicy: IfNotPresent
+#      ports:
+#        - containerPort: 8080
+#      livenessProbe:
+#        httpGet:
+#          path: /healthz
+#          port: 8080
+#        initialDelaySeconds: 5
+#        periodSeconds: 2
+#      readinessProbe:
+#        httpGet:
+#          path: /readiness
+#          port: 8080
+#        initialDelaySeconds: 2
+#        periodSeconds: 1
+#      lifecycle:
+#        postStart:
+#          exec:
+#            command: ["/bin/sh", "-c", "echo 'The http server is running!'"]
+#        preStop:
+#          exec:
+#            command: ["/bin/sh", "-c", "pkill -f http-server-graceful"]
+#      resources:
+#        requests:
+#          memory: "32Mi"
+#          cpu: "250m"
+#        limits:
+#          memory: "64Mi"
+#          cpu: "500m"
+#      volumeMounts:
+#        - name: config-volume
+#          mountPath: /etc/config
+#          readOnly: true
+#    volumes:
+#        - name: config-volume
+#          configMap:
+#            name: example-configmap
 
 
 ---
@@ -56,4 +57,72 @@ data:
       "name": "chris"
     }
 
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: http-server-graceful
+spec:
+    selector:
+        app: http-server-graceful
+    ports:
+        - protocol: TCP
+          port: 80
+          targetPort: 8080
+    type: NodePort
 
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: http-server-graceful
+spec:
+    replicas: 2
+    selector:
+        matchLabels:
+            app: http-server-graceful
+    template:
+        metadata:
+            labels:
+                app: http-server-graceful
+        spec:
+            containers:
+            - name: http-server-graceful
+              image: bingdongxiaozi/cloud_native_study:v1
+              imagePullPolicy: IfNotPresent
+              ports:
+                - containerPort: 8080
+              livenessProbe:
+                httpGet:
+                  path: /healthz
+                  port: 8080
+                initialDelaySeconds: 5
+                periodSeconds: 2
+              readinessProbe:
+                httpGet:
+                  path: /readiness
+                  port: 8080
+                initialDelaySeconds: 2
+                periodSeconds: 1
+              lifecycle:
+                postStart:
+                  exec:
+                    command: ["/bin/sh", "-c", "echo 'The http server is running!'"]
+                preStop:
+                  exec:
+                    command: ["/bin/sh", "-c", "pkill -f http-server-graceful"]
+              resources:
+                requests:
+                  memory: "32Mi"
+                  cpu: "250m"
+                limits:
+                  memory: "64Mi"
+                  cpu: "500m"
+              volumeMounts:
+                - name: config-volume
+                  mountPath: /etc/config
+                  readOnly: true
+            volumes:
+                - name: config-volume
+                  configMap:
+                    name: example-configmap
