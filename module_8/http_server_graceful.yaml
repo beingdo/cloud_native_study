@@ -126,3 +126,27 @@ spec:
                 - name: config-volume
                   configMap:
                     name: example-configmap
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: http-server-graceful-ingress
+  annotations:
+    kube.io/ingress.class: "nginx"
+spec:
+    tls:
+    - hosts:
+        - chris.com
+      secretName: chris-tls
+    rules:
+    - host: chris.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: http-server-graceful
+                port:
+                  number: 80
